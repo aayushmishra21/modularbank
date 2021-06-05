@@ -21,6 +21,11 @@ dependencies {
 
 	testCompileOnly 'org.projectlombok:lombok:1.18.20'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc', version: '2.5.0'
+
+	//implementation group: 'org.springframework', name: 'spring-jdbc', version: '5.3.7'
+	runtimeOnly 'org.postgresql:postgresql'
 }
 
 test {
