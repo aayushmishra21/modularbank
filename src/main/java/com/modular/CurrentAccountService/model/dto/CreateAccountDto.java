@@ -1,8 +1,9 @@
 package com.modular.CurrentAccountService.model.dto;
 
+import com.modular.CurrentAccountService.constant.Currency;
 import lombok.Data;
 
-import java.util.Currency;
+
 import java.util.Set;
 
 @Data

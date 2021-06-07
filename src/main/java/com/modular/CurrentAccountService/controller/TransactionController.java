@@ -19,13 +19,13 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping(value = "/v1/create_transaction")
-    public ResponseEntity<Object> createTransaction(@RequestBody CreateAccountDto createAccountDto) {
-        TransactionDto transaction = transactionService.createTransaction(createAccountDto);
+    public ResponseEntity<TransactionDto> createTransaction(@RequestBody TransactionDto transactionDto) {
+        TransactionDto transaction = transactionService.createTransaction(transactionDto);
         return new ResponseEntity<>(transaction, HttpStatus.OK);
     }
 
     @GetMapping(value = "/v1/get_transaction")
-    public ResponseEntity<Object> getTransactions(@RequestParam(name = "account_id") Long accountID) {
+    public ResponseEntity<Set<TransactionDtoWithoutBalance>> getTransactions(@RequestParam(name = "account_id") Long accountID) {
         Set<TransactionDtoWithoutBalance> transactions = transactionService.getTransactions(accountID);
         return new ResponseEntity<>(transactions, HttpStatus.OK);
     }

@@ -7,7 +7,7 @@ import com.modular.CurrentAccountService.model.dto.TransactionDtoWithoutBalance;
 import java.util.Set;
 
 public interface TransactionService {
-    TransactionDto createTransaction(CreateAccountDto createAccountDto);
+    TransactionDto createTransaction(TransactionDto transactionDto);
 
     Set<TransactionDtoWithoutBalance> getTransactions(Long accountID);
 }
