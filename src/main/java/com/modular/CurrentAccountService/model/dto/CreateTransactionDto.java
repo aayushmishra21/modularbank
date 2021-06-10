@@ -1,12 +1,16 @@
 package com.modular.CurrentAccountService.model.dto;
 
+import com.modular.CurrentAccountService.constant.Currency;
+import com.modular.CurrentAccountService.constant.TransactionDirection;
 import lombok.Data;
+
+import java.math.BigDecimal;
 
 @Data
 public class CreateTransactionDto {
     private Long accountId;
-    private double amount;//todo check id double is ok
-    private String currency;//todo can be enum
-    private String transactionDirection;//todo can be enum
+    private BigDecimal amount;
+    private Currency currency;
+    private TransactionDirection transactionDirection;
     private String description;
 }

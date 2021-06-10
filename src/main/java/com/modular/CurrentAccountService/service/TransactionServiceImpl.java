@@ -8,11 +8,14 @@ import com.modular.CurrentAccountService.model.dto.TransactionDto;
 import com.modular.CurrentAccountService.model.dto.TransactionDtoWithoutBalance;
 import com.modular.CurrentAccountService.model.entity.Balance;
 import com.modular.CurrentAccountService.model.entity.Transaction;
+import com.modular.CurrentAccountService.repository.AccountRepository;
+import com.modular.CurrentAccountService.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -20,21 +23,24 @@ import java.util.Set;
 public class TransactionServiceImpl implements TransactionService {
     private final BalanceService balanceService;
     private final CurrentAccountService currentAccountService;
+    private final SaveService saveService;
+    private final TransactionRepository transactionRepository;
+    private final AccountRepository accountRepository;
 
     @Override
     public TransactionDto createTransaction(TransactionDto transactionDto) {
-        if(transactionDto == null){
+        if (transactionDto == null) {
             throw new RuntimeException("Null transaction DTO!");
         }
         Long accountId = transactionDto.getAccountId();
-        if(accountId == null){
+        if (accountId == null) {
             throw new RuntimeException("Null account ID!");
         }
-        if(!currentAccountService.existsById(accountId)){
+        if (!accountRepository.existsById(accountId)) {
             throw new RuntimeException("This account does not exist");
         }
         Currency currency = transactionDto.getCurrency();
-        if(currency == null){
+        if (currency == null) {
             throw new RuntimeException("Null currency!");
         }
         synchronized (MutexFactory.get(accountId, currency)) {
@@ -44,15 +50,15 @@ public class TransactionServiceImpl implements TransactionService {
             }
             validateTransaction(balance, transactionDto);
             Transaction transaction = updateBalanceAndGetTransaction(balance, transactionDto);
-            return saveBalanceAndTransaction(balance, transaction);
+            return saveService.saveBalanceAndTransaction(balance, transaction);
         }
     }
 
     private void validateTransaction(Balance balance, TransactionDto transactionDto) {
-        if(transactionDto.getDirection() == null){
+        if (transactionDto.getDirection() == null) {
             throw new RuntimeException("Null direction!");
         }
-        if(transactionDto.getAmount() == null){
+        if (transactionDto.getAmount() == null) {
             throw new RuntimeException("Null amount!");
         }
         if (transactionDto.getDirection().equals(TransactionDirection.IN))
@@ -60,12 +66,6 @@ public class TransactionServiceImpl implements TransactionService {
         if (balance.getBalance().compareTo(transactionDto.getAmount()) < 0) {
             throw new RuntimeException("Insufficient balance");
         }
-    }
-
-    //todo should be transactional
-    private TransactionDto saveBalanceAndTransaction(Balance balance, Transaction transaction) {
-        //todo save to database
-        return Converter.transactionToDto(balance, transaction);
     }
 
 
@@ -82,7 +82,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Set<TransactionDtoWithoutBalance> getTransactions(Long accountID) {
-        //todo get transaction from db
-        return new HashSet<>();
+        List<Transaction> transactionList = transactionRepository.getByAccountId(accountID);
+        Set<TransactionDtoWithoutBalance> out = new HashSet<>();
+        transactionList.forEach(t -> out.add(Converter.transactionToDtoWithoutBalance(t)));
+        return out;
     }
 }

@@ -1,9 +1,6 @@
 package com.modular.CurrentAccountService.converter;
 
-import com.modular.CurrentAccountService.model.dto.AccountDto;
-import com.modular.CurrentAccountService.model.dto.BalanceDto;
-import com.modular.CurrentAccountService.model.dto.CreateAccountDto;
-import com.modular.CurrentAccountService.model.dto.TransactionDto;
+import com.modular.CurrentAccountService.model.dto.*;
 import com.modular.CurrentAccountService.model.entity.Account;
 import com.modular.CurrentAccountService.model.entity.Balance;
 import com.modular.CurrentAccountService.model.entity.Transaction;
@@ -50,5 +47,9 @@ public class Converter {
                 .amount(transaction.getAmount())
                 .description(transaction.getDescription())
                 .build();
+    }
+
+    public static TransactionDtoWithoutBalance transactionToDtoWithoutBalance(Transaction t) {
+        return TransactionDtoWithoutBalance.builder().transactionId(t.getTransactionId()).accountId(t.getAccountId()).amount(t.getAmount()).currency(t.getCurrency()).direction(t.getDirection()).description(t.getDescription()).build();
     }
 }

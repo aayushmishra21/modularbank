@@ -7,6 +7,4 @@ public interface CurrentAccountService {
     AccountDto createAccount(CreateAccountDto createAccountDto);
 
     AccountDto getAccount(Long accountID);
-
-    boolean existsById(Long accountId);
 }

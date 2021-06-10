@@ -6,35 +6,34 @@ import com.modular.CurrentAccountService.model.dto.AccountDto;
 import com.modular.CurrentAccountService.model.dto.CreateAccountDto;
 import com.modular.CurrentAccountService.model.entity.Account;
 import com.modular.CurrentAccountService.model.entity.Balance;
+import com.modular.CurrentAccountService.repository.AccountRepository;
+import com.modular.CurrentAccountService.repository.BalanceRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.HashSet;
-import java.util.Set;
 
 @Service
 @AllArgsConstructor
 public class CurrentAccountServiceImpl implements CurrentAccountService {
 
     private final BalanceService balanceService;
+    private final AccountRepository accountRepository;
+    private final BalanceRepository balanceRepository;
+    private final SaveService saveService;
 
     @Override
     public AccountDto createAccount(CreateAccountDto createAccountDto) {
         synchronized (MutexFactory.get(createAccountDto.getCustomerId())) {
             validateNewAccount(createAccountDto);
-            return saveAccount(createAccountDto);
+            return saveService.saveAccount(createAccountDto);
         }
     }
 
-    //todo transactional
-    private AccountDto saveAccount(CreateAccountDto createAccountDto) {
-        Account account = Converter.createAccountDtoToAccount(createAccountDto);
-        //todo save account
-        Set<Balance> balances = balanceService.initializeBalance(account, createAccountDto.getCurrency());
-        return Converter.AccountToDto(account, balances);
-    }
+
+
 
     private void validateNewAccount(CreateAccountDto createAccountDto) {
         if (createAccountDto == null) {
@@ -44,7 +43,7 @@ public class CurrentAccountServiceImpl implements CurrentAccountService {
             throw new RuntimeException("Customer Id is required!");
         }
         createAccountDto.setCustomerId(createAccountDto.getCustomerId().trim().toLowerCase());
-        boolean accountExistsWithCustomerId = false;//todo
+        boolean accountExistsWithCustomerId = accountRepository.existsByCustomerId(createAccountDto.getCustomerId());
         if (accountExistsWithCustomerId) {
             throw new RuntimeException("Customer Id already in use!");
         }
@@ -59,19 +58,11 @@ public class CurrentAccountServiceImpl implements CurrentAccountService {
 
     @Override
     public AccountDto getAccount(Long accountID) {
-        //todo getAccountById
-        Account account = Account.builder().build();
-        if (account == null) {
+        Account account = accountRepository.getById(accountID);
+        if (account.getAccountId() == null) {
             throw new RuntimeException("Account id : " + accountID + " does not exist!");
         }
-        //todo get balances
-        Set<Balance> balanceSet = new HashSet();
+        HashSet<Balance> balanceSet = new HashSet<>(balanceRepository.getByAccountId(accountID));
         return Converter.AccountToDto(account, balanceSet);
-    }
-
-    @Override
-    public boolean existsById(Long accountId) {
-        //todo get from db
-        return true;
     }
 }
